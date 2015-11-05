@@ -1,0 +1,108 @@
+train = read.csv('C://Users//shivam//Desktop//Titanic//train.csv', header= TRUE)
+test = read.csv('C://Users//shivam//Desktop//Titanic//test.csv', header= TRUE)
+?summary
+View(train)
+test.survived <- data.frame(Survived = rep("None", nrow(test)), test[,])
+data.combined <- rbind(train, test.survived)
+str(data.combined)
+
+data.combined$Survived <- as.factor(data.combined$Survived)
+data.combined$pclass <- as.factor(data.combined$pclass)
+
+
+table(data.combined$Survived)
+table(data.combined$pclass)
+
+
+train$pclass <- as.factor(train$pclass)
+ggplot(train , aes(x= pclass, fill = factor(Survived))) + 
+  geom_histogram(width=0.5) +
+  xlab("Pclass") + ylab("Total Count") + labs(fill = "Survived")
+
+head(as.character(train$Name))
+
+length(unique(as.character(data.combined$Name)))
+dup.names <- as.character(data.combined[which(duplicated(as.character(data.combined$Name))), "Name"])
+
+data.combined[which(data.combined$Name %in% dup.names),]
+
+#what's' up with the Miss and Mr titles?
+
+library(stringr)
+
+#is there any correlation with other variables(e.g sibsp)?
+misses <- data.combined[which(str_detect(data.combined$Name, "Miss" )), ]
+misses[1:5,]
+
+#hypothesis, does name title correlate with age
+mrses <- data.combined[which(str_detect(data.combined$Name, "Mrs" )), ]
+mrses[1:5,]
+
+#hypothesis, does name title correlate with age(not working because it is matching Mr. which also includes Mrs.)
+mres <- data.combined[which(str_detect(data.combined$Name, "Mr." )), ]
+mres[1:5,]
+
+
+#check out males to see if pattern continues
+males<- data.combined[which(train$Sex == "male"),]
+males[1:5,]
+
+#expand relationship between pclass and survived by adding a new variable "Title"
+#create a utility function to help with title extraction
+
+extractTitle <- function(Name) {
+  Name <- as.character(Name)
+
+if(length(grep("Miss.", Name)) > 0){
+  return("Miss.")
+} else if (length(grep("Master.", Name)) > 0){
+  return("Master.")
+} else if (length(grep("Mrs.", Name)) > 0){
+  return("Mrs.") 
+} else if (length(grep("Mr.", Name)) > 0){
+    return("Mr.")
+} else{return("Other")}
+  
+}
+
+titles <- NULL
+for(i in 1:nrow(data.combined)){
+  titles <- c(titles, extractTitle(data.combined[i, "Name"]))
+}
+data.combined$title<- as.factor(titles)
+# since we have only survived lables for train set, only use 891 rows of train
+
+ggplot(data.combined[1:891,], aes(x=title, fill= Survived)) +
+  geom_bar(binwidth= 0.5) +
+  facet_wrap(-pclass)+
+  ggtitle("Pclass")+
+  xlab("Title")+
+  ylab("Total Count")+
+  labs(fill= "Survived")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
